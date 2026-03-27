@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Shunya Spam - AI Email Security",
+  "name": "Shunya-Spam - AI Email Security",
   "version": "1.0.0",
   "description": "AI-powered browser extension to detect malicious links, phishing emails, and spam using real-time analysis.",
   "permissions": [
