@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shunya Spam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070d0b;
+      --surface: #0d1710;
+      --border: #1a3028;
+      --accent: #00ff88;
+      --accent-dim: #005533;
+      --warn: #ffaa00;
+      --danger: #ff3333;
+      --text: #c8e8d8;
+      --muted: #4a6a58;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 360px;
+      min-height: 480px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0a1f15 0%, #050f09 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,255,136,0.015) 2px,
+        rgba(0,255,136,0.015) 4px
+      );
+      pointer-events: none;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--accent);
+      position: relative;
+      animation: pulse-border 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+    }
+
+    .logo-text {
+      font-family: var(--sans);
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    .tagline {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding-left: 42px;
+    }
+
+    .status-dot {
+      position: absolute;
+      top: 14px; right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: var(--accent);
+    }
+
+    .status-dot::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: rgba(0,255,136,0.04);
+    }
+
+    /* Panels */
+    .panel { display: none; padding: 16px; }
+    .panel.active { display: block; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 2px;
+      background: var(--card-color, var(--accent));
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--card-color, var(--accent));
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* Scanner */
+    .scan-section { margin-bottom: 14px; }
+    
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .scan-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .scan-input:focus { border-color: var(--accent); }
+    .scan-input::placeholder { color: var(--muted); }
+
+    .btn {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      padding: 8px 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .result-box {
+      margin-top: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px;
+      display: none;
+    }
+
+    .result-box.visible { display: block; animation: fade-in 0.3s ease; }
+    @keyframes fade-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .result-verdict {
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+    }
+
+    .verdict-safe    { color: var(--accent); }
+    .verdict-suspicious { color: var(--warn); }
+    .verdict-dangerous  { color: var(--danger); }
+
+    .result-flags {
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .flag-item::before { content: "· "; color: var(--accent); }
+
+    /* Settings */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .setting-info {}
+    .setting-name {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .setting-desc {
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .toggle {
+      width: 36px;
+      height: 18px;
+      background: var(--border);
+      border-radius: 9px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--accent-dim); border: 1px solid var(--accent); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle.on::after { transform: translateX(16px); background: var(--accent); }
+
+    .api-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 9px;
+      padding: 7px 10px;
+      outline: none;
+      margin-top: 6px;
+    }
+    .api-input:focus { border-color: var(--accent); }
+
+    .save-btn {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* About */
+    .about-logo {
+      text-align: center;
+      padding: 20px 0 16px;
+    }
+    .about-big {
+      font-family: var(--sans);
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .about-big span { color: var(--accent); }
+    .about-sub {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .about-desc {
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.8;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+      margin-bottom: 12px;
+    }
+    .feature-list {
+      list-style: none;
+    }
+    .feature-list li {
+      font-size: 9px;
+      color: var(--muted);
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      letter-spacing: 0.5px;
+    }
+    .feature-list li::before { content: "▸ "; color: var(--accent); }
+
+    /* Footer */
+    .footer {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 8px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo-row">
+    <div class="logo-mark">S∅</div>
+    <div class="logo-text"><span>Shunya</span> Spam</div>
+  </div>
+  <div class="tagline">AI-Powered Email Security Shield</div>
+  <div class="status-dot">ACTIVE</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+  <button class="tab" onclick="switchTab('scanner')">Scanner</button>
+  <button class="tab" onclick="switchTab('settings')">Settings</button>
+  <button class="tab" onclick="switchTab('about')">About</button>
+</div>
+
+<!-- Dashboard -->
+<div class="panel active" id="panel-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card" style="--card-color: #00ff88">
+      <div class="stat-num" id="stat-scanned">0</div>
+      <div class="stat-label">Emails Scanned</div>
+    </div>
+    <div class="stat-card" style="--card-color: #ff3333">
+      <div class="stat-num" id="stat-blocked">0</div>
+      <div class="stat-label">Threats Blocked</div>
+    </div>
+    <div class="stat-card" style="--card-color: #ff6644">
+      <div class="stat-num" id="stat-phishing">0</div>
+      <div class="stat-label">Phishing Found</div>
+    </div>
+    <div class="stat-card" style="--card-color: #ffaa00">
+      <div class="stat-num" id="stat-spam">0</div>
+      <div class="stat-label">Spam Detected</div>
+    </div>
+  </div>
+
+  <div class="section-label">Supported Platforms</div>
+  <div style="display:flex; flex-direction:column; gap:6px;">
+    <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--surface); border:1px solid var(--border);">
+      <span style="color:var(--accent); font-size:11px;">✓</span>
+      <span style="font-size:10px; letter-spacing:0.5px;">Gmail (mail.google.com)</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--surface); border:1px solid var(--border);">
+      <span style="color:var(--accent); font-size:11px;">✓</span>
+      <span style="font-size:10px; letter-spacing:0.5px;">Outlook Web (outlook.live.com)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Scanner -->
+<div class="panel" id="panel-scanner">
+  <div class="scan-section">
+    <div class="section-label">Link Scanner</div>
+    <div class="input-row">
+      <input type="text" class="scan-input" id="link-input" placeholder="Paste a URL to scan..." />
+      <button class="btn" id="link-btn" onclick="scanLink()">Scan</button>
+    </div>
+    <div class="result-box" id="link-result"></div>
+  </div>
+
+  <div class="scan-section">
+    <div class="section-label">Email Text Scanner</div>
+    <textarea class="scan-input" id="email-input" rows="5" style="width:100%; resize:none;" placeholder="Paste email body text here..."></textarea>
+    <div class="input-row" style="margin-top:6px;">
+      <input type="text" class="scan-input" id="email-sender" placeholder="Sender email (optional)" />
+      <button class="btn" id="email-btn" onclick="scanEmail()">Analyze</button>
+    </div>
+    <div class="result-box" id="email-result"></div>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="panel" id="panel-settings">
+  <div class="setting-row">
+    <div class="setting-info">
+      <div class="setting-name">Auto-scan Emails</div>
+      <div class="setting-desc">Scan when you open an email</div>
+    </div>
+    <div class="toggle on" id="toggle-autoscan" onclick="toggleSetting('autoscan')"></div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-info">
+      <div class="setting-name">Show Warning Banners</div>
+      <div class="setting-desc">Display inline security alerts</div>
+    </div>
+    <div class="toggle on" id="toggle-banners" onclick="toggleSetting('banners')"></div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-info">
+      <div class="setting-name">AI Analysis</div>
+      <div class="setting-desc">Use Claude AI for deep scan</div>
+    </div>
+    <div class="toggle on" id="toggle-ai" onclick="toggleSetting('ai')"></div>
+  </div>
+
+  <div style="margin-top:14px;">
+    <div class="section-label">Anthropic API Key</div>
+    <input type="password" class="api-input" id="api-key-input" placeholder="sk-ant-api03-..." />
+    <button class="btn save-btn" onclick="saveApiKey()">Save API Key</button>
+    <div style="font-size:8px; color:var(--muted); margin-top:6px; line-height:1.6;">
+      Get your free API key at console.anthropic.com.<br>
+      Without a key, heuristic analysis is used.
+    </div>
+  </div>
+</div>
+
+<!-- About -->
+<div class="panel" id="panel-about">
+  <div class="about-logo">
+    <div class="about-big"><span>Shunya</span> Spam</div>
+    <div class="about-sub">v1.0.0 · AI EMAIL SECURITY</div>
+  </div>
+  <div class="about-desc">
+    An AI-powered browser extension that protects you from phishing, spam, and malicious links in real-time using Claude AI.
+  </div>
+  <ul class="feature-list">
+    <li>Real-time email threat detection</li>
+    <li>AI-powered phishing analysis via Claude</li>
+    <li>Malicious link & URL scanner</li>
+    <li>Spam keyword pattern detection</li>
+    <li>Gmail & Outlook Web support</li>
+    <li>Offline heuristic fallback</li>
+    <li>Risk score with confidence rating</li>
+    <li>Inline security banners</li>
+  </ul>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <span>SHUNYA SPAM © 2025</span>
+  <span>COLLEGE PROJECT · CYBERSECURITY</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
