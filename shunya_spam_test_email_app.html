@@ -1,0 +1,411 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.app { display: flex; height: 580px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-primary); }
+.sidebar { width: 220px; border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; background: var(--color-background-secondary); flex-shrink: 0; }
+.sidebar-header { padding: 14px 14px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.app-name { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.app-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.compose-btn { margin: 10px 14px; padding: 7px 12px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 12px; font-weight: 500; color: var(--color-text-primary); cursor: pointer; text-align: left; }
+.compose-btn:hover { background: var(--color-background-tertiary); }
+.nav-item { padding: 7px 14px; font-size: 12px; color: var(--color-text-secondary); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.nav-item:hover { background: var(--color-background-primary); }
+.nav-item.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 500; }
+.nav-badge { font-size: 10px; background: var(--color-background-danger); color: var(--color-text-danger); padding: 1px 6px; border-radius: 99px; }
+.email-list { flex: 1; overflow-y: auto; border-right: 0.5px solid var(--color-border-tertiary); width: 260px; flex-shrink: 0; }
+.list-header { padding: 10px 14px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: 0.03em; display: flex; justify-content: space-between; align-items: center; }
+.email-item { padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; transition: background 0.1s; }
+.email-item:hover { background: var(--color-background-secondary); }
+.email-item.active { background: var(--color-background-info); }
+.email-item.unread .ei-subject { font-weight: 500; }
+.ei-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.ei-sender { font-size: 12px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.ei-time { font-size: 10px; color: var(--color-text-tertiary); flex-shrink: 0; }
+.ei-subject { font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.ei-preview { font-size: 10px; color: var(--color-text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.threat-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; flex-shrink: 0; }
+.dot-safe { background: #3B6D11; }
+.dot-spam { background: #BA7517; }
+.dot-phish { background: #A32D2D; }
+.dot-none { background: transparent; border: 1px solid var(--color-border-tertiary); }
+.reader { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.reader-toolbar { padding: 10px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; gap: 6px; align-items: center; }
+.tb-btn { padding: 5px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 11px; color: var(--color-text-secondary); background: none; cursor: pointer; }
+.tb-btn:hover { background: var(--color-background-secondary); }
+.tb-btn.analyze { background: var(--color-background-primary); border-color: var(--color-border-secondary); color: var(--color-text-primary); font-weight: 500; }
+.reader-body { flex: 1; overflow-y: auto; padding: 16px; }
+.email-header { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.email-subject { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; }
+.meta-row { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.meta-label { font-size: 11px; color: var(--color-text-tertiary); width: 36px; flex-shrink: 0; }
+.meta-val { font-size: 12px; color: var(--color-text-secondary); }
+.email-body-text { font-size: 13px; color: var(--color-text-primary); line-height: 1.7; }
+.email-body-text a { color: var(--color-text-info); text-decoration: underline; cursor: pointer; }
+.email-link { font-size: 11px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); padding: 3px 8px; border-radius: var(--border-radius-md); color: var(--color-text-secondary); word-break: break-all; margin: 4px 0; display: block; }
+
+.banner { padding: 10px 14px; border-left: 3px solid; margin: 0 0 10px; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; }
+.banner-safe { border-color: #3B6D11; background: #EAF3DE; }
+.banner-safe .b-title { color: #3B6D11; }
+.banner-spam { border-color: #BA7517; background: #FAEEDA; }
+.banner-spam .b-title { color: #BA7517; }
+.banner-phish { border-color: #A32D2D; background: #FCEBEB; }
+.banner-phish .b-title { color: #A32D2D; }
+.b-title { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+.b-desc { font-size: 11px; color: var(--color-text-secondary); }
+.b-flags { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+.b-flag { font-size: 10px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 2px 6px; color: var(--color-text-secondary); }
+.score-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.score-bar { flex: 1; height: 4px; background: var(--color-border-tertiary); border-radius: 2px; overflow: hidden; }
+.score-fill { height: 100%; border-radius: 2px; }
+.score-num { font-size: 11px; font-weight: 500; }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--color-text-tertiary); font-size: 13px; gap: 8px; }
+.badge { font-size: 10px; padding: 2px 6px; border-radius: 99px; }
+.badge-safe { background: #EAF3DE; color: #27500A; }
+.badge-spam { background: #FAEEDA; color: #633806; }
+.badge-phish { background: #FCEBEB; color: #791F1F; }
+.badge-unanalyzed { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+.analyzing { font-size: 12px; color: var(--color-text-tertiary); display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { width: 12px; height: 12px; border: 1.5px solid var(--color-border-tertiary); border-top-color: var(--color-text-secondary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+</style>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="app-name">TestMail</div>
+      <div class="app-sub">Shunya Spam Test Client</div>
+    </div>
+    <button class="compose-btn" onclick="openCompose()">+ Compose</button>
+    <div class="nav-item active">Inbox <span class="nav-badge" id="inbox-badge">5</span></div>
+    <div class="nav-item">Sent</div>
+    <div class="nav-item">Spam</div>
+    <div class="nav-item">Trash</div>
+    <div style="flex:1;"></div>
+    <div style="padding:10px 14px; font-size:10px; color:var(--color-text-tertiary); border-top:0.5px solid var(--color-border-tertiary);">test@testmail.dev</div>
+  </div>
+
+  <div class="email-list" id="email-list">
+    <div class="list-header">
+      Inbox
+      <span style="font-size:10px; color:var(--color-text-tertiary); cursor:pointer;" onclick="analyzeAll()">Analyze all</span>
+    </div>
+  </div>
+
+  <div class="reader" id="reader">
+    <div class="reader-toolbar" id="reader-toolbar" style="display:none;">
+      <button class="tb-btn analyze" id="analyze-btn" onclick="analyzeCurrentEmail()">Analyze with Shunya Spam</button>
+      <button class="tb-btn" onclick="markSpam()">Mark spam</button>
+      <button class="tb-btn" onclick="deleteEmail()">Delete</button>
+      <div style="flex:1;"></div>
+      <div id="analysis-badge"></div>
+    </div>
+    <div class="reader-body" id="reader-body">
+      <div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+        Select an email to read
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="compose-modal" style="display:none; position:absolute; bottom:20px; right:20px; width:380px; background:var(--color-background-primary); border:0.5px solid var(--color-border-secondary); border-radius:var(--border-radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.12); z-index:100; overflow:hidden;">
+  <div style="padding:10px 14px; background:var(--color-background-secondary); border-bottom:0.5px solid var(--color-border-tertiary); display:flex; justify-content:space-between; align-items:center;">
+    <span style="font-size:13px; font-weight:500;">New Message</span>
+    <button onclick="closeCompose()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--color-text-secondary);">×</button>
+  </div>
+  <div style="padding:10px 14px;">
+    <input id="c-from" placeholder="From" style="width:100%;margin-bottom:6px;padding:5px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);" value="suspicious@paypa1-secure.com" />
+    <input id="c-to" placeholder="To" style="width:100%;margin-bottom:6px;padding:5px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);" value="test@testmail.dev" />
+    <input id="c-subject" placeholder="Subject" style="width:100%;margin-bottom:6px;padding:5px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);" value="URGENT: Verify your account immediately!" />
+    <textarea id="c-body" rows="5" style="width:100%;margin-bottom:8px;padding:5px 8px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:12px;resize:none;background:var(--color-background-primary);color:var(--color-text-primary);">Dear Customer,
+
+Your account has been suspended. Verify your identity immediately by clicking: http://paypa1-secure-login.xyz/verify
+
+Act now or lose access forever!</textarea>
+    <div style="display:flex; gap:6px; justify-content:flex-end;">
+      <button onclick="sendCustomEmail()" style="padding:6px 14px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;font-weight:500;color:var(--color-text-primary);">Send to Inbox</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const emails = [
+  {
+    id: 1, unread: true,
+    sender: "PayPaI Security", from: "security@paypa1-update.xyz",
+    subject: "URGENT: Your account will be suspended",
+    time: "9:12 AM",
+    preview: "Click here immediately to verify your account...",
+    body: `Dear Valued Customer,
+
+We have detected suspicious activity on your PayPal account. Your account will be SUSPENDED within 24 hours unless you verify your identity immediately.
+
+Click the link below to verify:`,
+    links: ["http://paypa1-secure-login.xyz/verify?token=abc123def456"],
+    threat: null
+  },
+  {
+    id: 2, unread: true,
+    sender: "lottery@prizes-intl.com", from: "lottery@prizes-intl.com",
+    subject: "YOU HAVE WON $1,500,000 — Claim Now!",
+    time: "8:45 AM",
+    preview: "Congratulations! You have been selected as the winner...",
+    body: `CONGRATULATIONS!
+
+You have been selected as the winner of our international lottery. You have won $1,500,000 USD!
+
+To claim your reward, simply send us your bank account details and a processing fee of $200. 100% free guaranteed. Act now — offer expires today!
+
+No credit card needed. Make money fast from home. Wire transfer available.`,
+    links: ["http://prizes-intl-claim.ru/winner"],
+    threat: null
+  },
+  {
+    id: 3, unread: false,
+    sender: "GitHub", from: "noreply@github.com",
+    subject: "Your pull request was merged",
+    time: "Yesterday",
+    preview: "feat: add authentication module — merged into main",
+    body: `Hi there,
+
+Your pull request #47 "feat: add authentication module" was successfully merged into the main branch by a collaborator.
+
+You can view the changes at: https://github.com/yourrepo/pulls/47
+
+Thanks for contributing!
+
+— The GitHub Team`,
+    links: ["https://github.com/yourrepo/pulls/47"],
+    threat: null
+  },
+  {
+    id: 4, unread: true,
+    sender: "IT Support", from: "it-support@comp4ny-helpdesk.net",
+    subject: "Action Required: Password expires in 1 hour",
+    time: "7:30 AM",
+    preview: "Your corporate password will expire. Update it now...",
+    body: `Dear Employee,
+
+This is an urgent security alert. Your corporate account password will expire in 1 HOUR. Failure to update will lock you out of all company systems.
+
+Click immediately to update your password and confirm your identity:`,
+    links: ["http://comp4ny-helpdesk.net/reset?urgent=true&user=employee"],
+    threat: null
+  },
+  {
+    id: 5, unread: false,
+    sender: "Prof. Sharma", from: "sharma@university.edu",
+    subject: "Project submission deadline extended",
+    time: "Mon",
+    preview: "The cybersecurity project deadline has been moved to Friday...",
+    body: `Dear Students,
+
+I hope this message finds you well. I wanted to inform you that the deadline for the cybersecurity project submission has been extended to this Friday, 11:59 PM.
+
+Please make sure your GitHub repository is public and the README is updated with your setup instructions.
+
+Feel free to email me if you have any questions.
+
+Best regards,
+Prof. Sharma
+Department of Computer Science`,
+    links: [],
+    threat: null
+  }
+];
+
+let currentId = null;
+let analyzing = false;
+
+function renderList() {
+  const list = document.getElementById('email-list');
+  const items = emails.map(e => {
+    const dotClass = e.threat === 'safe' ? 'dot-safe' : e.threat === 'spam' ? 'dot-spam' : e.threat === 'phish' ? 'dot-phish' : 'dot-none';
+    return `<div class="email-item ${e.unread?'unread':''} ${currentId===e.id?'active':''}" onclick="openEmail(${e.id})">
+      <div class="ei-top">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span class="threat-dot ${dotClass}"></span>
+          <span class="ei-sender">${e.sender}</span>
+        </div>
+        <span class="ei-time">${e.time}</span>
+      </div>
+      <div class="ei-subject">${e.subject}</div>
+      <div class="ei-preview">${e.preview}</div>
+    </div>`;
+  }).join('');
+  const oldHeader = list.querySelector('.list-header');
+  list.innerHTML = '';
+  list.appendChild(oldHeader || (() => { const d=document.createElement('div'); d.innerHTML=`<div class="list-header">Inbox <span style="font-size:10px;color:var(--color-text-tertiary);cursor:pointer;" onclick="analyzeAll()">Analyze all</span></div>`; return d.firstChild; })());
+  list.insertAdjacentHTML('beforeend', items);
+  document.getElementById('inbox-badge').textContent = emails.filter(e=>e.unread).length;
+}
+
+function openEmail(id) {
+  currentId = id;
+  const e = emails.find(x=>x.id===id);
+  e.unread = false;
+  renderList();
+
+  document.getElementById('reader-toolbar').style.display = 'flex';
+  document.getElementById('analyze-btn').textContent = 'Analyze with Shunya Spam';
+  document.getElementById('analyze-btn').disabled = false;
+  document.getElementById('analysis-badge').innerHTML = '';
+
+  const linksHtml = e.links.map(l => `<span class="email-link">${l}</span>`).join('');
+  const bannerHtml = e.analysisResult ? renderBanner(e.analysisResult) : '';
+
+  document.getElementById('reader-body').innerHTML = `
+    ${bannerHtml}
+    <div class="email-header">
+      <div class="email-subject">${e.subject}</div>
+      <div class="meta-row"><span class="meta-label">From</span><span class="meta-val">${e.sender} &lt;${e.from}&gt;</span></div>
+      <div class="meta-row"><span class="meta-label">To</span><span class="meta-val">test@testmail.dev</span></div>
+      <div class="meta-row"><span class="meta-label">Date</span><span class="meta-val">${e.time}</span></div>
+    </div>
+    <div class="email-body-text">${e.body.replace(/\n/g,'<br>')}</div>
+    ${linksHtml ? `<div style="margin-top:12px;"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;">Links in this email:</div>${linksHtml}</div>` : ''}
+  `;
+}
+
+function renderBanner(r) {
+  const cls = r.threat === 'phish' ? 'banner-phish' : r.threat === 'spam' ? 'banner-spam' : 'banner-safe';
+  const label = r.threat === 'phish' ? 'Phishing detected' : r.threat === 'spam' ? 'Spam detected' : 'Email appears safe';
+  const scoreColor = r.score >= 70 ? '#A32D2D' : r.score >= 35 ? '#BA7517' : '#3B6D11';
+  const flagsHtml = (r.flags||[]).slice(0,4).map(f=>`<span class="b-flag">${f}</span>`).join('');
+  return `<div class="banner ${cls}">
+    <div class="b-title">Shunya Spam: ${label}</div>
+    <div class="b-desc">${r.summary}</div>
+    ${flagsHtml ? `<div class="b-flags">${flagsHtml}</div>` : ''}
+    <div class="score-row">
+      <div class="score-bar"><div class="score-fill" style="width:${r.score}%;background:${scoreColor};"></div></div>
+      <span class="score-num" style="color:${scoreColor};">${r.score}/100</span>
+    </div>
+  </div>`;
+}
+
+function analyzeCurrentEmail() {
+  if (!currentId || analyzing) return;
+  const e = emails.find(x=>x.id===currentId);
+  analyzing = true;
+
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('analyze-btn').textContent = 'Analyzing...';
+
+  const body = document.getElementById('reader-body');
+  body.insertAdjacentHTML('afterbegin', `<div class="analyzing" id="analyzing-msg"><div class="spinner"></div>Running Shunya Spam analysis...</div>`);
+
+  setTimeout(() => {
+    const result = runHeuristics(e);
+    e.analysisResult = result;
+    e.threat = result.threat;
+    analyzing = false;
+    renderList();
+    openEmail(currentId);
+
+    const badge = result.threat === 'phish' ? `<span class="badge badge-phish">Phishing</span>` :
+                  result.threat === 'spam'  ? `<span class="badge badge-spam">Spam</span>` :
+                  `<span class="badge badge-safe">Safe</span>`;
+    document.getElementById('analysis-badge').innerHTML = badge;
+    document.getElementById('analyze-btn').textContent = 'Re-analyze';
+    document.getElementById('analyze-btn').disabled = false;
+  }, 1400);
+}
+
+function runHeuristics(e) {
+  let score = 0;
+  const flags = [];
+
+  const phishKw = ["suspended","verify your","account will be","click immediately","act now","expires","unauthorized","confirm your identity","update your password","unusual sign-in","security alert"];
+  const spamKw  = ["you have won","claim now","100% free","no credit card","make money fast","wire transfer","processing fee","bank account","lottery","prize","congratulations"];
+
+  const text = (e.subject + ' ' + e.body).toLowerCase();
+
+  for (const k of phishKw) { if (text.includes(k)) { score += 16; flags.push('Phishing phrase: "'+k+'"'); } }
+  for (const k of spamKw)  { if (text.includes(k)) { score += 12; flags.push('Spam phrase: "'+k+'"'); } }
+
+  for (const link of e.links) {
+    if (/\d{1,3}\.\d{1,3}/.test(link)) { score += 25; flags.push('Raw IP in link'); }
+    if (/paypa1|comp4ny|prizes-intl|\.xyz|\.ru/.test(link)) { score += 30; flags.push('Suspicious domain: '+new URL(link).hostname); }
+    if (link.startsWith('http://')) { score += 10; flags.push('Unencrypted HTTP link'); }
+  }
+
+  if (/URGENT|!!!|ACT NOW/i.test(e.subject)) { score += 12; flags.push('Urgency tactics in subject'); }
+  if (/\$[\d,]+/.test(e.body)) { score += 10; flags.push('Money/reward mentioned'); }
+  if (e.from.split('@')[1] && /\d{4,}|paypa1|prizes|comp4ny/.test(e.from.split('@')[1])) { score += 20; flags.push('Suspicious sender domain'); }
+
+  score = Math.min(score, 100);
+
+  const spamScore  = (e.body.toLowerCase().match(/lottery|prize|won|reward|claim/g)||[]).length * 12;
+  const phishScore = (e.body.toLowerCase().match(/verify|suspend|identity|password|account/g)||[]).length * 10;
+
+  let threat = 'safe', summary = 'No significant threats detected.';
+  if (score >= 60) {
+    threat = phishScore >= spamScore ? 'phish' : 'spam';
+    summary = threat === 'phish' ? 'High-risk phishing attempt. Do not click any links.' : 'Likely scam or spam. Delete this email.';
+  } else if (score >= 30) {
+    threat = 'spam';
+    summary = 'Suspicious content detected. Treat with caution.';
+  }
+
+  return { score, flags: [...new Set(flags)].slice(0,5), threat, summary };
+}
+
+function analyzeAll() {
+  emails.forEach((e, i) => {
+    setTimeout(() => {
+      if (!e.analysisResult) {
+        e.analysisResult = runHeuristics(e);
+        e.threat = e.analysisResult.threat;
+        renderList();
+        if (currentId === e.id) openEmail(e.id);
+      }
+    }, i * 300);
+  });
+}
+
+function markSpam() {
+  if (!currentId) return;
+  const e = emails.find(x=>x.id===currentId);
+  e.threat = 'spam';
+  if (!e.analysisResult) e.analysisResult = { score: 60, flags: ['Manually marked as spam'], threat: 'spam', summary: 'Marked as spam by user.' };
+  else { e.analysisResult.threat = 'spam'; e.analysisResult.summary = 'Marked as spam by user.'; }
+  renderList();
+  openEmail(currentId);
+}
+
+function deleteEmail() {
+  if (!currentId) return;
+  const idx = emails.findIndex(x=>x.id===currentId);
+  emails.splice(idx,1);
+  currentId = null;
+  renderList();
+  document.getElementById('reader-toolbar').style.display = 'none';
+  document.getElementById('reader-body').innerHTML = '<div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>Select an email to read</div>';
+}
+
+function openCompose() { document.getElementById('compose-modal').style.display = 'block'; }
+function closeCompose() { document.getElementById('compose-modal').style.display = 'none'; }
+
+function sendCustomEmail() {
+  const from = document.getElementById('c-from').value;
+  const subject = document.getElementById('c-subject').value;
+  const body = document.getElementById('c-body').value;
+  const linkMatch = body.match(/https?:\/\/[^\s]+/g) || [];
+
+  const newEmail = {
+    id: Date.now(), unread: true,
+    sender: from.split('@')[0], from,
+    subject, time: 'Just now',
+    preview: body.substring(0,60)+'...',
+    body, links: linkMatch, threat: null
+  };
+
+  emails.unshift(newEmail);
+  closeCompose();
+  renderList();
+  openEmail(newEmail.id);
+}
+
+renderList();
+</script>
